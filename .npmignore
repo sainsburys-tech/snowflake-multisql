@@ -1,0 +1,20 @@
+# nyc test coverage report
+.nyc_output
+coverage
+
+# editor settings
+.vscode
+.editorconfig
+
+# unit tests
+tests
+test
+test/aws.json
+
+# other
+examples
+test.*
+test.*
+ts*.json
+src
+.env
