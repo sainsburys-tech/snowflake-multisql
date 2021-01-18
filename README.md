@@ -10,6 +10,8 @@ Unfortunately [Snowflake SDK](https://www.npmjs.com/package/snowflake-sdk) doesn
 
 - `yarn add snowflake-multisql` or `npm i snowflake-multisql`
 
+---
+
 ## Connecting
 
 The constructor extends SnowflakePromise class addin the new method **_executeAll_**.
@@ -20,10 +22,20 @@ The unique method's param is deconstructed into the variables below:
   "sqlText": "your SQL Text string",
   "binds": "from the original library, replace tags by sequence",
   "replaceTags": "new, replace tags by name, whatever order them appers",
-  "includeResults": true, // returns field 'data' with results for each chunk.
-  "preview": true // logs the final order of statements and parsed variables without executing them.
+  "includeResults": true,
+  "preview": true
 }
 ```
+
+- **replaceTags**: just spread tags within your sql scripts like {%tag_name%} (please make sure there is no spaces around tag_name). After that, just add the array of tag/value pairs to replaceTags param [Example](https://www.npmjs.com/package/snowflake-multisql)
+
+- **includeResults**: returns field 'data' with results for each chunk.
+
+- **preview**: logs the final order of statements and parsed variables without executing them.
+
+- **loadFiles**: loads all files from a specific folder ended with ".sql" (ex: file1.sql, file2.sql)
+
+---
 
 ## Basic usage
 
@@ -60,6 +72,59 @@ async function main() {
   });
 
   console.log(rows);
+}
+
+main();
+```
+
+---
+
+## Advanced options
+
+```typescript
+  import { Snowflake, loadFiles } from "snowflake-multisql"
+
+  const snowflake = new Snowflake({
+    account: "<account name>",
+    username: "<username>",
+    password: "<password>",
+    database: "DEMO_DATABASE",
+    schema: "DEMO_SCHEMA",
+    warehouse: "DEMO_WH",
+  });
+
+  // SWISS ARMY KNIFE: Just point your folder and this util method will
+  // merge all files ended with '.sql'
+  // IMPORTANT: it merges in the order files appear in your operating system
+  // i.e. alphabetical order
+  const sqlText = await loadFiles({
+    filesPath: path.join(process.cwd(), "./sqlFolder"),
+  });
+
+  // file-1.sql content:
+  //  CREATE OR REPLACE TABLE temp_table_customer as
+  //  SELECT COUNT(*) FROM customer WHERE C_MKTSEGMENT='{%tag_auto%}';
+
+  // file-2.sql content:
+  //  SELECT * from temp_table_customer
+  //  WHERE product_name = '{%tag_auto%}'
+
+  // file-3.sql content:
+  //  USE SCHEMA demo_schema;
+  //  SELECT COUNT(*) FROM customer WHERE c_mktsegment='{%tag_bike%}';
+
+  const replaceTags = [
+    { tag: "tag_auto", value: "AUTOMOBILE" },
+    { tag: "tag_bike", value: "BIKE" },
+  ];
+
+  const rows = await snowflake.executeAll({
+    sqlText,
+    replaceTags,
+    includeResults: true,
+  });
+
+  rows.map((row) => console.dir(row));
 }
 
 main();
