@@ -1,4 +1,4 @@
-# snowflake-multisql
+# snowflake-multisql [![node](https://img.shields.io/node/v/snowflake-multisql.svg)](https://www.npmjs.com/package/snowflake-multisql)
 
 A Multi SQL, Promise-based and Typescript version to your [Snowflake](https://www.snowflake.net/) data warehouse.
 
@@ -9,6 +9,21 @@ Unfortunately [Snowflake SDK](https://www.npmjs.com/package/snowflake-sdk) doesn
 ## Installation
 
 - `yarn add snowflake-multisql` or `npm i snowflake-multisql`
+
+## Connecting
+
+The constructor extends SnowflakePromise class addin the new method **_executeAll_**.
+The unique method's param is deconstructed into the variables below:
+
+```json
+{
+  "sqlText": "your SQL Text string",
+  "binds": "from the original library, replace tags by sequence",
+  "replaceTags": "new, replace tags by name, whatever order them appers",
+  "includeResults": true, // returns field 'data' with results for each chunk.
+  "preview": true // logs the final order of statements and parsed variables without executing them.
+}
+```
 
 ## Basic usage
 
@@ -29,17 +44,23 @@ async function main() {
 
   await snowflake.connect();
 
-  const rows = await snowflake.executeAll(
-    "SELECT COUNT(*) FROM CUSTOMER WHERE C_MKTSEGMENT=:1",
-    ["AUTOMOBILE"]
-  );
+  const sqlText = `
+    CREATE OR REPLACE TABLE temp_table_customer as
+     SELECT COUNT(*) FROM customer WHERE C_MKTSEGMENT=:1;
+
+    USE SCHEMA demo_schema;
+    SELECT COUNT(*) FROM customer WHERE c_mktsegment=:2;
+  `;
+  const binds = ["AUTOMOBILE", "BIKE"];
+
+  const rows = await snowflake.executeAll({
+    sqlText,
+    binds,
+    includeResults: true,
+  });
 
   console.log(rows);
 }
 
 main();
 ```
-
-## Connecting
-
-The constructor extends SnowflakePromise class or take your Snowflake instance and argument.

@@ -4,13 +4,14 @@ export interface ITag {
   tag: string;
   value: string;
 }
-
-export interface IMultiSqlResult {
+export interface IPreview {
   chunkText: string;
-  duration: number;
   chunkOrder: number;
   chunksTotal: number;
-  totalDuration: number;
+}
+export interface IMultiSqlResult extends IPreview {
+  duration?: number;
+  totalDuration?: number;
   data?: any[];
 }
 export class SnowflakeMultiSql extends Snowflake {
@@ -20,10 +21,14 @@ export class SnowflakeMultiSql extends Snowflake {
   public async executeAll({
     sqlText,
     replace,
+    binds,
+    preview,
     includeResults = false,
   }: {
     sqlText: string;
     replace?: ITag[];
+    binds?: any[];
+    preview?: boolean;
     includeResults?: boolean;
   }): Promise<IMultiSqlResult[]> {
     const replaced = this.replaceTags(sqlText, replace);
@@ -33,22 +38,30 @@ export class SnowflakeMultiSql extends Snowflake {
     let totalDuration: number = 0;
     for (let _i = 0; _i < chunks.length; _i++) {
       if (chunks[_i].trim().length > 0) {
-        const startTime: number = new Date().valueOf();
-        const data = await this.execute(chunks[_i]);
-        const duration = new Date().valueOf() - startTime;
-        totalDuration += duration;
+        if (preview) {
+          results.push({
+            chunkText: chunks[_i],
+            chunkOrder: _i + 1,
+            chunksTotal,
+          });
+        } else {
+          const startTime: number = new Date().valueOf();
+          const data = await this.execute(chunks[_i], binds);
+          const duration = new Date().valueOf() - startTime;
+          totalDuration += duration;
 
-        const topush: IMultiSqlResult = {
-          chunkText: chunks[_i],
-          chunkOrder: _i + 1,
-          chunksTotal,
-          duration,
-          totalDuration,
-        };
-        if (includeResults) {
-          topush.data = data;
+          const topush: IMultiSqlResult = {
+            chunkText: chunks[_i],
+            chunkOrder: _i + 1,
+            chunksTotal,
+            duration,
+            totalDuration,
+          };
+          if (includeResults) {
+            topush.data = data;
+          }
+          results.push(topush);
         }
-        results.push(topush);
       }
     }
     return results;
