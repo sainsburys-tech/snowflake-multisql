@@ -1,6 +1,6 @@
 {
   "name": "snowflake-multisql",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Multi-SQL, Promise-based, TypeScript wrapper for Snowflake SDK",
   "repository": "github:brugos/snowflake-multisql",
   "bugs": "https://github.com/brugos/snowflake-multisql/issues",
