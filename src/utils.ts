@@ -32,7 +32,7 @@ export async function loadFiles({
   return iterators.reduce(reducer);
 }
 
-function isSql(fileName: string): boolean {
+export function isSql(fileName: string): boolean {
   const fileNameParts = fileName.split(".");
   return fileNameParts[fileNameParts.length - 1].toLowerCase() === "sql";
 }
