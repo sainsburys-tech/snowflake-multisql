@@ -1,9 +1,9 @@
 import { promises as fsp } from "fs";
 
 /**
- * Load files in a specific directory in the order they appear
+ * Load files in a specific path in the order they appear
  * @param fileNames
- * @param folderName
+ * @param filesPath
  */
 export async function loadFiles({
   filesPath,
@@ -32,7 +32,7 @@ export async function loadFiles({
   return iterators.reduce(reducer);
 }
 
-function isSql(fileName: string): boolean {
+export function isSql(fileName: string): boolean {
   const fileNameParts = fileName.split(".");
   return fileNameParts[fileNameParts.length - 1].toLowerCase() === "sql";
 }

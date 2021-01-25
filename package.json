@@ -1,6 +1,6 @@
 {
   "name": "snowflake-multisql",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Multi-SQL, Promise-based, TypeScript wrapper for Snowflake SDK",
   "repository": "github:brugos/snowflake-multisql",
   "bugs": "https://github.com/brugos/snowflake-multisql/issues",
@@ -16,17 +16,22 @@
   "main": "build/src/index.js",
   "types": "build/src/index.d.ts",
   "scripts": {
-    "prepare": "del-cli build && tsc"
+    "prepare": "del-cli build && tsc",
+    "test": "jest --runInBand --silent",
+    "test:coverage": "jest --runInBand --coverage",
+    "test:coverage:map": "jest --runInBand --coverage && open ./coverage/lcov-report/snowflake-multisql.ts.html"
   },
   "engines": {
     "node": ">=10"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.20",
     "@types/node": "^14.14.20",
     "del-cli": "^3.0.1",
     "dotenv": "^8.2.0",
     "eslint": "^7.17.0",
-    "np": "^7.2.0",
+    "jest": "^26.6.3",
+    "ts-jest": "^26.4.4",
     "ts-node": "^9.1.1",
     "tslog": "^3.0.5",
     "typescript": "^4.1.3"
