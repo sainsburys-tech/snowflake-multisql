@@ -15,6 +15,13 @@ export interface IMultiSqlResult extends IPreview {
   totalDuration?: number;
   data?: any[];
 }
+export interface IExecuteAll {
+  sqlText: string;
+  tags?: ITag[];
+  binds?: any[];
+  preview?: boolean;
+  includeResults?: boolean;
+}
 export class SnowflakeMultiSql extends Snowflake {
   constructor(conn: ConnectionOptions) {
     super(conn);
@@ -25,13 +32,7 @@ export class SnowflakeMultiSql extends Snowflake {
     binds,
     preview,
     includeResults = false,
-  }: {
-    sqlText: string;
-    tags?: ITag[];
-    binds?: any[];
-    preview?: boolean;
-    includeResults?: boolean;
-  }): Promise<IMultiSqlResult[]> {
+  }: IExecuteAll): Promise<IMultiSqlResult[]> {
     // const replaced = this.replaceTags(sqlText, tags);
     const chunks = this.getChunks(sqlText);
     const chunksTotal = chunks.length;
@@ -115,9 +116,6 @@ export class SnowflakeMultiSql extends Snowflake {
       //   textTag.replace("%}", "").replace("{%", "");
 
       const checkTags = (textTags: string[], tagValues: ITag[]) => {
-        // console.log(textTags);
-        // console.log(tagValues);
-        // console.log(tagValues.map((t) => cleanTextTag(t)));
         const uniqueTextTags = textTags.filter(
           (txtTag, i) => textTags.indexOf(txtTag) === i
         );
@@ -129,7 +127,6 @@ export class SnowflakeMultiSql extends Snowflake {
               // `it seems you've forgotten to list the tag ${uniqueTag}`
             );
         });
-        // console.log("ok");
       };
 
       checkTags(
@@ -137,22 +134,16 @@ export class SnowflakeMultiSql extends Snowflake {
         tagValues
       );
 
-      // console.dir(sqlTextTags);
-      // console.dir(sqlText);
-      // console.dir(tagValues);
-
       let _i = 0;
       sqlTextTags.forEach((textTag, _i) => {
         ret.sqlText = ret.sqlText.replace(
           textTag.raw,
           ":".concat(String(_i + 1))
         );
-        // console.log(ret.sqlText);
         const tagValue = tagValues?.find((obj) => obj.tag === textTag.clean);
         if (tagValue) ret.binds.push(tagValue?.value);
       });
 
-      console.dir(ret);
       return ret;
     } catch (error) {
       throw error;

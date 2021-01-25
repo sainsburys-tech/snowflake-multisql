@@ -1,9 +1,9 @@
 import { promises as fsp } from "fs";
 
 /**
- * Load files in a specific directory in the order they appear
+ * Load files in a specific path in the order they appear
  * @param fileNames
- * @param folderName
+ * @param filesPath
  */
 export async function loadFiles({
   filesPath,
