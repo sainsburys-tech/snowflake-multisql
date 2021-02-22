@@ -4,6 +4,8 @@
     "test/**/*"
   ],
   "compilerOptions": {
+    "baseUrl": ".", 
+    "esModuleInterop": true,
     "rootDir": ".",
     "outDir": "build",
     "target": "ES5",
@@ -16,6 +18,9 @@
     "pretty": true,
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
+    "paths": {
+      "tests/*": ["./tests/*"]
+    },
   },
   "exclude": ["node_modules"]
 }

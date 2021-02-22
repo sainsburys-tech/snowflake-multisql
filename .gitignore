@@ -60,5 +60,4 @@ examples
 
 # Project-specific ignores
 build
-src/test.ts
-tests
+integration-test

@@ -1,7 +1,7 @@
 {
   "name": "snowflake-multisql",
-  "version": "1.0.0",
-  "description": "Multi-SQL, Promise-based, TypeScript wrapper for Snowflake SDK",
+  "version": "1.2.0",
+  "description": "Multi SQL Statement, Promise-based, TypeScript wrapper for Snowflake SDK",
   "repository": "github:brugos/snowflake-multisql",
   "bugs": "https://github.com/brugos/snowflake-multisql/issues",
   "license": "MIT",
@@ -17,26 +17,38 @@
   "types": "build/src/index.d.ts",
   "scripts": {
     "prepare": "del-cli build && tsc",
-    "test": "jest --runInBand --silent",
-    "test:coverage": "jest --runInBand --coverage",
-    "test:coverage:map": "jest --runInBand --coverage && open ./coverage/lcov-report/snowflake-multisql.ts.html"
+    "test": "mocha --timeout 60000",
+    "test:watch": "yarn test:mocha -w",
+    "test:coverage": "yarn test && open && open ./coverage/lcov-report/index.ts.html"
   },
   "engines": {
     "node": ">=10"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.20",
+    "@types/chai": "^4.2.15",
+    "@types/chai-as-promised": "^7.1.3",
+    "@types/chai-subset": "^1.3.3",
+    "@types/expect": "^24.3.0",
+    "@types/mocha": "^8.2.1",
     "@types/node": "^14.14.20",
+    "@types/sinon": "^9.0.10",
+    "chai": "^4.3.0",
+    "chai-as-promised": "^7.1.1",
+    "chai-subset": "^1.6.0",
     "del-cli": "^3.0.1",
     "dotenv": "^8.2.0",
     "eslint": "^7.17.0",
-    "jest": "^26.6.3",
-    "ts-jest": "^26.4.4",
+    "mocha": "^8.3.0",
+    "nyc": "^15.1.0",
+    "sinon": "^9.2.4",
+    "ts-mocha": "^8.0.0",
     "ts-node": "^9.1.1",
+    "tsconfig-paths": "^3.9.0",
     "tslog": "^3.0.5",
     "typescript": "^4.1.3"
   },
   "dependencies": {
-    "snowflake-promise": "^4.2.0"
+    "snowflake-promise": "^4.2.0",
+    "ts-mixer": "^5.4.0"
   }
 }
