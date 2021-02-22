@@ -1,4 +1,6 @@
 import { Snowflake, ConnectionOptions } from "snowflake-promise";
+import { Mixin } from "ts-mixer";
+import { EventEmitter } from "events";
 
 export interface ITag {
   tag: string;
@@ -22,18 +24,16 @@ export interface IExecuteAll {
   preview?: boolean;
   includeResults?: boolean;
 }
-export class SnowflakeMultiSql extends Snowflake {
+export class SnowflakeMultiSql extends Mixin(Snowflake, EventEmitter) {
   constructor(conn: ConnectionOptions) {
     super(conn);
   }
   public async executeAll({
     sqlText,
     tags,
-    binds,
     preview,
     includeResults = false,
   }: IExecuteAll): Promise<IMultiSqlResult[]> {
-    // const replaced = this.replaceTags(sqlText, tags);
     const chunks = this.getChunks(sqlText);
     const chunksTotal = chunks.length;
     const results: IMultiSqlResult[] = [];
@@ -51,21 +51,23 @@ export class SnowflakeMultiSql extends Snowflake {
         };
         if (preview) {
           results.push(previewObj);
+          this.emit("progress", previewObj);
         } else {
           const startTime: number = new Date().valueOf();
           const data = await this.execute(sqlText, binds);
           const duration = new Date().valueOf() - startTime;
           totalDuration += duration;
 
-          const topush: IMultiSqlResult = {
+          const toPush: IMultiSqlResult = {
             ...previewObj,
             duration,
             totalDuration,
           };
           if (includeResults) {
-            topush.data = data;
+            toPush.data = data;
           }
-          results.push(topush);
+          results.push(toPush);
+          this.emit("progress", toPush);
         }
       }
     }

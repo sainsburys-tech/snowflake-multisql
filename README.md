@@ -1,18 +1,29 @@
-# snowflake-multisql [![node](https://img.shields.io/node/v/snowflake-multisql.svg)](https://www.npmjs.com/package/snowflake-multisql)
+# snowflake-multisql [![npm](https://img.shields.io/npm/v/snowflake-multisql.svg)](https://www.npmjs.com/package/snowflake-multisql) [![node](https://img.shields.io/node/v/snowflake-multisql.svg)](https://www.npmjs.com/package/snowflake-multisql)
 
-A Multi SQL, Promise-based and Typescript version to your [Snowflake](https://www.snowflake.net/) data warehouse.
+A Multi SQL Statement, Promise-based and Typescript version to your [Snowflake](https://www.snowflake.net/) data warehouse, since the original library doesn't support this multi statement calls.
 
-This library works on top of the excellent [Snowflake Promise](https://www.npmjs.com/package/snowflake-promise) for Node.js, which is a wrapper for [Snowflake SDK](https://www.npmjs.com/package/snowflake-sdk)
+Also adds nice features like:
 
-Unfortunately [Snowflake SDK](https://www.npmjs.com/package/snowflake-sdk) doesn't support multi statement calls.
+- replaces tags defined in the scripts by name using original data types (examples below).
+- Emits "progress" events so you can monitor long run calls
+- Preview parsed statement before sending to Snowflake.
+- Shows duration (in miliseconds) as well the
+- Shows data returned by Snowflake on each statement with the option to ommit them as well.
+- Utils: Loads an entire folder of "\*.sql" files or an array of specific files.
 
-## Installation
-
-- `yarn add snowflake-multisql` or `npm i snowflake-multisql`
+PS: This library works on top of the excellent [Snowflake Promise](https://www.npmjs.com/package/snowflake-promise) for Node.js, which is a wrapper for [Snowflake SDK](https://www.npmjs.com/package/snowflake-sdk)
 
 ---
 
-## Connecting
+### Installation
+
+- `yarn add snowflake-multisql`  
+  or
+- `npm i snowflake-multisql`
+
+---
+
+## How to use it
 
 The constructor extends SnowflakePromise class addin the new method **_executeAll_**.
 The unique method's param is deconstructed into the variables below:
@@ -21,7 +32,7 @@ The unique method's param is deconstructed into the variables below:
 {
   "sqlText": "your SQL Text string",
   "binds": "from the original library, replace tags by sequence",
-  "replaceTags": "new, replace tags by name, whatever order them appers",
+  "tags": "new, replace tags by name, whatever order them appers",
   "includeResults": true,
   "preview": true
 }
@@ -64,6 +75,15 @@ async function main() {
     SELECT COUNT(*) FROM customer WHERE C_MKTSEGMENT_ID=:2;
   `;
   const binds = ["AUTOMOBILE", 1234];
+
+  // NEW FEATURE: Feel free to monitor your running progress
+  snowflake.on("progress", (data) =>
+    console.log(`
+    progress: ${data.chunkOrder}/${data.chunksTotal}
+    duration: ${data.duration} ms,
+    totalDuration: ${data.totalDuration} ms
+  `)
+  );
 
   const rows = await snowflake.executeAll({
     sqlText,
@@ -113,70 +133,27 @@ main();
   //  USE SCHEMA demo_schema;
   //  SELECT COUNT(*) FROM customer WHERE segment_id={%segment_id%};
 
-  const replaceTags = [
+  const tags = [
     { tag: "purchase_date", value: new Date(1610976670682) },
     { tag: "product_name", value: "AUTOMOBILE" },
     { tag: "segment_id", value: 1234 },
   ];
 
-  const rows = await snowflake.executeAll({
-    sqlText,
-    replaceTags,
-    includeResults: true,
-    preview: false // set it to true if you want to check the scripts first.
-  });
-
-  rows.map((row) => console.dir(row));
-}
-
-main();
-```
-
----
-
-## Advanced options with reaplceTags
-
-```typescript
-  import { Snowflake, loadFiles } from "snowflake-multisql"
-
-  const snowflake = new Snowflake({
-    account: "<account name>",
-    username: "<username>",
-    password: "<password>",
-    database: "DEMO_DATABASE",
-    schema: "DEMO_SCHEMA",
-    warehouse: "DEMO_WH",
-  });
-
-  // SWISS ARMY KNIFE as explained in the earlier example
-  const sqlText = await loadFiles({
-    filesPath: path.join(process.cwd(), "./sqlFolder"),
-  });
-
-  // file-1.sql content:
-  //  CREATE OR REPLACE TABLE temp_table_customer as
-  //  SELECT COUNT(*) FROM customer WHERE C_MKTSEGMENT={%tag_auto%};
-
-  // file-2.sql content:
-  //  SELECT * from temp_table_customer
-  //  WHERE product_name = {%tag_auto%}
-
-  // file-3.sql content:
-  //  USE SCHEMA demo_schema;
-  //  SELECT COUNT(*) FROM customer WHERE c_mktsegment={%tag_bike%};
-
-  const replaceTags = [
-    { tag: "tag_auto", value: "AUTOMOBILE" },
-    { tag: "tag_bike", value: "BIKE" },
-  ];
+  // NEW FEATURE: Feel free to monitor your running progress
+  snowflake.on("progress", (data) => console.log(`
+    progress: ${data.chunkOrder}/${data.chunksTotal}
+    duration: ${data.duration} ms,
+    totalDuration: ${data.totalDuration} ms
+  `));
 
   const rows = await snowflake.executeAll({
     sqlText,
-    replaceTags,
+    tags,
     includeResults: true,
+    preview: false // set it true for checking statements before sending to Snowflake.
   });
 
-  rows.map((row) => console.dir(row));
+  rows.map((rows) => console.dir(rows));
 }
 
 main();

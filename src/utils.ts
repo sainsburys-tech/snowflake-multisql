@@ -18,8 +18,6 @@ export async function loadFiles({
   } else {
     files = [...fileNames];
   }
-  console.dir(files);
-
   const promises = [];
   files.map((fileName) => {
     if (isSql(fileName)) {
