@@ -7,6 +7,7 @@ export {
 } from "./snowflake-multisql";
 export { loadFiles } from "./utils";
 export {
+  Statement,
   ConnectionOptions,
   ExecuteOptions,
   SnowflakeError,
