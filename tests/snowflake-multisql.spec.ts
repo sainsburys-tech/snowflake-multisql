@@ -32,7 +32,14 @@ describe("checks tagsToBinds function", () => {
       warehouse: "DEMO_WH",
     });
     const stubSF = sinon.stub(snowflake, "execute");
-    stubSF.resolves([{ FIELD_1: "VALUE_FIELD_1" }]);
+    stubSF.resolves([
+      {
+        FIELD_1: "VALUE_FIELD_1",
+        NumField: 123,
+        DateField: new Date(),
+        ObjField: { a: "a", b: 1, c: new Date() },
+      },
+    ]);
   });
 
   afterEach(() => {

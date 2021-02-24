@@ -15,7 +15,7 @@ export interface IPreview {
 export interface IMultiSqlResult extends IPreview {
   duration?: number;
   totalDuration?: number;
-  data?: any[];
+  data?: Record<string, any>[]; //any[];
 }
 export interface IExecuteAll {
   sqlText: string;
