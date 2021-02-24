@@ -1,6 +1,6 @@
 {
   "name": "snowflake-multisql",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "description": "Multi SQL Statement, Promise-based, TypeScript wrapper for Snowflake SDK",
   "repository": "github:brugos/snowflake-multisql",
   "bugs": "https://github.com/brugos/snowflake-multisql/issues",
@@ -18,7 +18,7 @@
   "scripts": {
     "prepare": "del-cli build && tsc",
     "test": "mocha --timeout 60000",
-    "test:watch": "yarn test:mocha -w",
+    "test:watch": "yarn test -w",
     "test:coverage": "yarn test && open && open ./coverage/lcov-report/index.ts.html",
     "lint:eslint": "eslint ./ --ext .ts --max-warnings 0",
     "lint": "tsc --noEmit"

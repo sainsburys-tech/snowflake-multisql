@@ -21,6 +21,20 @@ describe("checks tagsToBinds function", () => {
     { tag: "tag2", value: 123 },
     { tag: "tag4", value: new Date(1610976670682) },
   ];
+  type Conversion = {
+    ID: string;
+    NUM: number;
+    DATE: Date;
+    OBJ?: any;
+  };
+  const mockedResponse: any[] = [
+    {
+      ID: "ID",
+      NUM: 123,
+      DATE: new Date(),
+      OBJ: { a: "a", b: 1, c: new Date() },
+    },
+  ];
 
   beforeEach(() => {
     snowflake = new Snowflake({
@@ -32,30 +46,35 @@ describe("checks tagsToBinds function", () => {
       warehouse: "DEMO_WH",
     });
     const stubSF = sinon.stub(snowflake, "execute");
-    stubSF.resolves([
-      {
-        FIELD_1: "VALUE_FIELD_1",
-        NumField: 123,
-        DateField: new Date(),
-        ObjField: { a: "a", b: 1, c: new Date() },
-      },
-    ]);
+    stubSF.resolves(mockedResponse);
   });
 
   afterEach(() => {
     sinon.restore();
   });
 
+  it("executeAll with Generics", async () => {
+    const spyProgress = sinon.spy();
+    snowflake.on("progress", spyProgress);
+
+    const ret = await snowflake.executeAll<Conversion>({
+      sqlText,
+      tags,
+      includeResults: true,
+    });
+    expect(spyProgress.called).to.be.true;
+    expect(ret[0].data).to.deep.equal(mockedResponse);
+  });
+
   it("executeAll must emmit progress event at least once", async () => {
     const spyProgress = sinon.spy();
     snowflake.on("progress", spyProgress);
 
-    const ret: IMultiSqlResult[] = await snowflake.executeAll({
+    const ret = await snowflake.executeAll({
       sqlText,
       tags,
       preview: true,
     });
-
     expect(spyProgress.called).to.be.true;
   });
 
@@ -73,7 +92,7 @@ describe("checks tagsToBinds function", () => {
         new Date(1610976670682),
       ],
     };
-    const ret: IMultiSqlResult[] = await snowflake.executeAll({
+    const ret = await snowflake.executeAll({
       sqlText,
       tags,
       includeResults: false,

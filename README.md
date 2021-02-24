@@ -158,3 +158,42 @@ main();
 
 main();
 ```
+
+---
+
+## Using GENERIC TYPES
+
+```typescript
+  import { Snowflake, loadFiles } from "snowflake-multisql"
+
+  const snowflake = new Snowflake({
+    account: "<account name>",
+    username: "<username>",
+    password: "<password>",
+    database: "DEMO_DATABASE",
+    schema: "DEMO_SCHEMA",
+    warehouse: "DEMO_WH",
+  });
+
+  const sqlText = await loadFiles({
+    filesPath: path.join(process.cwd(), "./sqlFolder"),
+  });
+
+  type MyType = {
+    id: string;
+    num: number;
+    date: Date;
+    obj?: any;
+  };
+
+  const rows = await snowflake.executeAll<MyType>({
+    sqlText,
+    tags,
+    includeResults: true,
+  });
+
+  rows.map((rows) => console.log("Your number is: ",rows[0].data[0].num));
+}
+
+main();
+```

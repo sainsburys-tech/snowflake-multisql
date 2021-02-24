@@ -10,10 +10,10 @@ export interface IPreview {
 }
 
 export type data = Record<string, any>;
-export interface IMultiSqlResult extends IPreview {
+export interface IMultiSqlResult<T> extends IPreview {
   duration?: number;
   totalDuration?: number;
-  data?: data[];
+  data?: T[];
 }
 
 export type ITag = {
@@ -31,15 +31,15 @@ export class SnowflakeMultiSql extends Mixin(Snowflake, EventEmitter) {
   constructor(conn: ConnectionOptions) {
     super(conn);
   }
-  public async executeAll({
+  public async executeAll<T>({
     sqlText,
     tags,
     preview,
     includeResults = false,
-  }: IExecuteAll): Promise<IMultiSqlResult[]> {
+  }: IExecuteAll): Promise<IMultiSqlResult<T>[]> {
     const chunks = this.getChunks(sqlText);
     const chunksTotal = chunks.length;
-    const results: IMultiSqlResult[] = [];
+    const results: IMultiSqlResult<T>[] = [];
     let totalDuration: number = 0;
     for (let _i = 0; _i < chunks.length; _i++) {
       if (chunks[_i].trim().length > 0) {
@@ -61,7 +61,7 @@ export class SnowflakeMultiSql extends Mixin(Snowflake, EventEmitter) {
           const duration = new Date().valueOf() - startTime;
           totalDuration += duration;
 
-          const toPush: IMultiSqlResult = {
+          const toPush: IMultiSqlResult<T> = {
             ...previewObj,
             duration,
             totalDuration,
