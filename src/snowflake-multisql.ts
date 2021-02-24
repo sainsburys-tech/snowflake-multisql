@@ -2,21 +2,24 @@ import { Snowflake, ConnectionOptions } from "snowflake-promise";
 import { Mixin } from "ts-mixer";
 import { EventEmitter } from "events";
 
-export interface ITag {
-  tag: string;
-  value: any;
-}
 export interface IPreview {
   chunkText: string;
   chunkOrder: number;
   chunksTotal: number;
   binds: any[];
 }
+
+export type data = Record<string, any>;
 export interface IMultiSqlResult extends IPreview {
   duration?: number;
   totalDuration?: number;
-  data?: Record<string, any>[]; //any[];
+  data?: data[];
 }
+
+export type ITag = {
+  tag: string;
+  value: any;
+};
 export interface IExecuteAll {
   sqlText: string;
   tags?: ITag[];

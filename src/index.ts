@@ -1,5 +1,6 @@
 export {
   SnowflakeMultiSql as Snowflake,
+  data,
   ITag,
   IMultiSqlResult,
   IPreview,
