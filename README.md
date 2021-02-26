@@ -4,12 +4,12 @@ A Multi SQL Statement, Promise-based and Typescript version to your [Snowflake](
 
 Also adds nice features like:
 
-- replaces tags defined in the scripts by name using original data types (examples below).
-- Emits "progress" events so you can monitor long run calls
-- Preview parsed statement before sending to Snowflake.
-- Shows duration (in miliseconds) as well the
-- Shows data returned by Snowflake on each statement with the option to ommit them as well.
-- Utils: Loads an entire folder of "\*.sql" files or an array of specific files.
+- replaces **tags** defined in the scripts by name using original data types (examples below).
+- Emits **progress** events so you can monitor long run calls
+- **Preview** parsed statement before sending to Snowflake.
+- Shows **duration** (in miliseconds) for each chunk as well the **totalDuration**.
+- Shows **data** returned by Snowflake on each statement (and not only the last statement) with the option to ommit them as well.
+- Utils: Loads an entire **folder** of "\*.sql" files or an array of specific files.
 
 PS: This library works on top of the excellent [Snowflake Promise](https://www.npmjs.com/package/snowflake-promise) for Node.js, which is a wrapper for [Snowflake SDK](https://www.npmjs.com/package/snowflake-sdk)
 
@@ -77,7 +77,7 @@ async function main() {
   const binds = ["AUTOMOBILE", 1234];
 
   // NEW FEATURE: Feel free to monitor your running progress
-  snowflake.on("progress", (data) =>
+  snowflake.progress.on("news", (data) =>
     console.log(`
     progress: ${data.chunkOrder}/${data.chunksTotal}
     duration: ${data.duration} ms,
@@ -140,7 +140,7 @@ main();
   ];
 
   // NEW FEATURE: Feel free to monitor your running progress
-  snowflake.on("progress", (data) => console.log(`
+  snowflake.progress.on("news", (data) => console.log(`
     progress: ${data.chunkOrder}/${data.chunksTotal}
     duration: ${data.duration} ms,
     totalDuration: ${data.totalDuration} ms

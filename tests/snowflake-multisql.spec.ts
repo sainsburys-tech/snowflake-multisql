@@ -4,7 +4,6 @@ import sinon from "sinon";
 import {
   SnowflakeMultiSql as Snowflake,
   ITag,
-  IMultiSqlResult,
 } from "../src/snowflake-multisql";
 
 describe("test1", () => {
@@ -54,21 +53,16 @@ describe("checks tagsToBinds function", () => {
   });
 
   it("executeAll with Generics", async () => {
-    const spyProgress = sinon.spy();
-    snowflake.on("progress", spyProgress);
-
     const ret = await snowflake.executeAll<Conversion>({
       sqlText,
       tags,
       includeResults: true,
     });
-    expect(spyProgress.called).to.be.true;
     expect(ret[0].data).to.deep.equal(mockedResponse);
   });
-
   it("executeAll must emmit progress event at least once", async () => {
     const spyProgress = sinon.spy();
-    snowflake.on("progress", spyProgress);
+    snowflake.progress.on("news", spyProgress);
 
     const ret = await snowflake.executeAll({
       sqlText,

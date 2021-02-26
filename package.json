@@ -1,6 +1,6 @@
 {
   "name": "snowflake-multisql",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Multi SQL Statement, Promise-based, TypeScript wrapper for Snowflake SDK",
   "repository": "github:brugos/snowflake-multisql",
   "bugs": "https://github.com/brugos/snowflake-multisql/issues",
@@ -50,7 +50,6 @@
     "typescript": "^3.9.7"
   },
   "dependencies": {
-    "snowflake-promise": "^4.2.0",
-    "ts-mixer": "^5.4.0"
+    "snowflake-promise": "^4.2.0"
   }
 }

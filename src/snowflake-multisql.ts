@@ -1,76 +1,74 @@
 import { Snowflake, ConnectionOptions } from "snowflake-promise";
-import { Mixin } from "ts-mixer";
 import { EventEmitter } from "events";
 
-export interface IPreview {
+export type IExecuteAllPreview = {
   chunkText: string;
   chunkOrder: number;
   chunksTotal: number;
   binds: any[];
-}
+};
 
-export type data = Record<string, any>;
-export interface IMultiSqlResult<T> extends IPreview {
+export type IExecuteAllResult<T> = IExecuteAllPreview & {
   duration?: number;
   totalDuration?: number;
   data?: T[];
-}
+};
 
 export type ITag = {
   tag: string;
   value: any;
 };
-export interface IExecuteAll {
+export type IExecuteAll = {
   sqlText: string;
   tags?: ITag[];
   binds?: any[];
   preview?: boolean;
   includeResults?: boolean;
-}
-export class SnowflakeMultiSql extends Mixin(Snowflake, EventEmitter) {
+};
+
+export class SnowflakeMultiSql extends Snowflake {
+  public readonly progress = new EventEmitter();
   constructor(conn: ConnectionOptions) {
     super(conn);
   }
-  public async executeAll<T>({
-    sqlText,
-    tags,
-    preview,
-    includeResults = false,
-  }: IExecuteAll): Promise<IMultiSqlResult<T>[]> {
-    const chunks = this.getChunks(sqlText);
+
+  public async executeAll<T = Record<string, string>>(
+    params: IExecuteAll
+  ): Promise<IExecuteAllResult<T>[]> {
+    const chunks = this.getChunks(params.sqlText);
     const chunksTotal = chunks.length;
-    const results: IMultiSqlResult<T>[] = [];
+    const results: IExecuteAllResult<T>[] = [];
     let totalDuration: number = 0;
     for (let _i = 0; _i < chunks.length; _i++) {
       if (chunks[_i].trim().length > 0) {
         const rawChunkText = chunks[_i];
-        const { sqlText, binds } = this.tagsToBinds(rawChunkText, tags);
+        const { sqlText, binds } = this.tagsToBinds(rawChunkText, params.tags);
 
-        const previewObj = {
+        const previewObj: IExecuteAllPreview = {
           chunkText: sqlText,
           chunkOrder: _i + 1,
           chunksTotal,
           binds,
         };
-        if (preview) {
+        if (params.preview) {
           results.push(previewObj);
-          this.emit("progress", previewObj);
+          this.progress.emit("news", previewObj);
         } else {
           const startTime: number = new Date().valueOf();
           const data = await this.execute(sqlText, binds);
           const duration = new Date().valueOf() - startTime;
           totalDuration += duration;
 
-          const toPush: IMultiSqlResult<T> = {
+          const toPush: IExecuteAllResult<T> = {
             ...previewObj,
             duration,
             totalDuration,
           };
-          if (includeResults) {
+          if (params.includeResults) {
             toPush.data = data;
           }
           results.push(toPush);
-          this.emit("progress", toPush);
+          this.progress.emit("news", toPush);
         }
       }
     }

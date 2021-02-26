@@ -1,9 +1,8 @@
 export {
   SnowflakeMultiSql as Snowflake,
   ITag,
-  IMultiSqlResult,
-  IPreview,
   IExecuteAll,
+  IExecuteAllResult,
 } from "./snowflake-multisql";
 export { loadFiles } from "./utils";
 export {
