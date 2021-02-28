@@ -5,6 +5,7 @@ A Multi SQL Statement, Promise-based and Typescript version to your [Snowflake](
 Also adds nice features like:
 
 - replaces **tags** defined in the scripts by name using original data types (examples below).
+- Also replaces **inline tags** like `select * from {%table_name%}` so you can play around different scenarios between code and the sql script. Use cases: replace database name depending on the environment used (ex: db_name_dev, db_name_prod)
 - Emits **progress** events so you can monitor long run calls
 - **Preview** parsed statement before sending to Snowflake.
 - Shows **duration** (in miliseconds) for each chunk as well the **totalDuration**.
@@ -48,7 +49,109 @@ The unique method's param is deconstructed into the variables below:
 
 ---
 
-## Basic usage
+## Usage
+
+```typescript
+  import { Snowflake, loadFiles } from "snowflake-multisql"
+
+  const snowflake = new Snowflake({
+    account: "<account name>",
+    username: "<username>",
+    password: "<password>",
+    database: "DEMO_DATABASE",
+    schema: "DEMO_SCHEMA",
+    warehouse: "DEMO_WH",
+  });
+
+  // SWISS ARMY KNIFE: Just point your folder and this util method will
+  // merge all files ended with '.sql'
+  // IMPORTANT: it merges in the order files appear in your operating system
+  // i.e. alphabetical order
+  const sqlText = await loadFiles({
+    filesPath: path.join(process.cwd(), "./sqlFolder"),
+  });
+
+  // file-1.sql content:
+  //  CREATE OR REPLACE TABLE temp_table_customer as
+  //  SELECT COUNT(*) FROM {%table_name%} WHERE PURCHASE_DATE={%purchase_date%};
+
+  // file-2.sql content:
+  //  SELECT * from temp_table_customer
+  //  WHERE product_name = {%product_name%}
+
+  // file-3.sql content:
+  //  USE SCHEMA demo_schema;
+  //  SELECT COUNT(*) FROM {%table_name%} WHERE segment_id={%segment_id%};
+
+  const tags = [
+    { tag: "purchase_date", value: new Date(1610976670682) },
+    { tag: "product_name", value: "AUTOMOBILE" },
+    { tag: "segment_id", value: 1234 },
+    { tag: "table_name", value: "customers", inline: true },
+  ];
+
+  // NEW FEATURE: Feel free to monitor your running progress
+  snowflake.progress.on("news", (data) => console.log(`
+    progress: ${data.chunkOrder}/${data.chunksTotal}
+    duration: ${data.duration} ms,
+    totalDuration: ${data.totalDuration} ms
+  `));
+
+  const rows = await snowflake.executeAll({
+    sqlText,
+    tags,
+    includeResults: true,
+    preview: false // set it true for checking statements before sending to Snowflake.
+  });
+
+  rows.map((rows) => console.dir(rows));
+}
+
+main();
+```
+
+---
+
+## Using GENERIC types
+
+```typescript
+  import { Snowflake, loadFiles } from "snowflake-multisql"
+
+  const snowflake = new Snowflake({
+    account: "<account name>",
+    username: "<username>",
+    password: "<password>",
+    database: "DEMO_DATABASE",
+    schema: "DEMO_SCHEMA",
+    warehouse: "DEMO_WH",
+  });
+
+  const sqlText = await loadFiles({
+    filesPath: path.join(process.cwd(), "./sqlFolder"),
+  });
+
+  type MyType = {
+    id: string;
+    num: number;
+    date: Date;
+    obj?: any;
+  };
+
+  const rows = await snowflake.executeAll<MyType>({
+    sqlText,
+    tags,
+    includeResults: true,
+  });
+
+  rows.map((rows) => console.log("Your number is: ",rows[0].data[0].num));
+}
+
+main();
+```
+
+---
+
+## If you prefer to manage the original binds by yourself
 
 ```typescript
 const Snowflake = require("snowflake-multisql").Snowflake;
@@ -92,107 +195,6 @@ async function main() {
   });
 
   console.log(rows);
-}
-
-main();
-```
-
----
-
-## Advanced options
-
-```typescript
-  import { Snowflake, loadFiles } from "snowflake-multisql"
-
-  const snowflake = new Snowflake({
-    account: "<account name>",
-    username: "<username>",
-    password: "<password>",
-    database: "DEMO_DATABASE",
-    schema: "DEMO_SCHEMA",
-    warehouse: "DEMO_WH",
-  });
-
-  // SWISS ARMY KNIFE: Just point your folder and this util method will
-  // merge all files ended with '.sql'
-  // IMPORTANT: it merges in the order files appear in your operating system
-  // i.e. alphabetical order
-  const sqlText = await loadFiles({
-    filesPath: path.join(process.cwd(), "./sqlFolder"),
-  });
-
-  // file-1.sql content:
-  //  CREATE OR REPLACE TABLE temp_table_customer as
-  //  SELECT COUNT(*) FROM customer WHERE PURCHASE_DATE={%purchase_date%};
-
-  // file-2.sql content:
-  //  SELECT * from temp_table_customer
-  //  WHERE product_name = {%product_name%}
-
-  // file-3.sql content:
-  //  USE SCHEMA demo_schema;
-  //  SELECT COUNT(*) FROM customer WHERE segment_id={%segment_id%};
-
-  const tags = [
-    { tag: "purchase_date", value: new Date(1610976670682) },
-    { tag: "product_name", value: "AUTOMOBILE" },
-    { tag: "segment_id", value: 1234 },
-  ];
-
-  // NEW FEATURE: Feel free to monitor your running progress
-  snowflake.progress.on("news", (data) => console.log(`
-    progress: ${data.chunkOrder}/${data.chunksTotal}
-    duration: ${data.duration} ms,
-    totalDuration: ${data.totalDuration} ms
-  `));
-
-  const rows = await snowflake.executeAll({
-    sqlText,
-    tags,
-    includeResults: true,
-    preview: false // set it true for checking statements before sending to Snowflake.
-  });
-
-  rows.map((rows) => console.dir(rows));
-}
-
-main();
-```
-
----
-
-## Using GENERIC TYPES
-
-```typescript
-  import { Snowflake, loadFiles } from "snowflake-multisql"
-
-  const snowflake = new Snowflake({
-    account: "<account name>",
-    username: "<username>",
-    password: "<password>",
-    database: "DEMO_DATABASE",
-    schema: "DEMO_SCHEMA",
-    warehouse: "DEMO_WH",
-  });
-
-  const sqlText = await loadFiles({
-    filesPath: path.join(process.cwd(), "./sqlFolder"),
-  });
-
-  type MyType = {
-    id: string;
-    num: number;
-    date: Date;
-    obj?: any;
-  };
-
-  const rows = await snowflake.executeAll<MyType>({
-    sqlText,
-    tags,
-    includeResults: true,
-  });
-
-  rows.map((rows) => console.log("Your number is: ",rows[0].data[0].num));
 }
 
 main();

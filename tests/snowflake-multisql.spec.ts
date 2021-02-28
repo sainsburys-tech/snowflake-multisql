@@ -14,11 +14,12 @@ describe("checks tagsToBinds function", () => {
   let snowflake: Snowflake;
 
   const sqlText: string =
-    "select * from {%tag0%} {%tag2%} {%tag0%} {%tag4%} where {%tag2%} {%tag4%}";
+    "select * from {%inline1%} {%tag0%} {%tag2%} {%tag0%} {%tag4%} where {%tag2%} {%tag4%}";
   const tags: ITag[] = [
     { tag: "tag0", value: "hi" },
     { tag: "tag2", value: 123 },
     { tag: "tag4", value: new Date(1610976670682) },
+    { tag: "inline1", value: "tblName", inline: true },
   ];
   type Conversion = {
     ID: string;
@@ -72,9 +73,9 @@ describe("checks tagsToBinds function", () => {
     expect(spyProgress.called).to.be.true;
   });
 
-  it("matches expected response", async () => {
+  it("check binds functionality", async () => {
     const expected = {
-      chunkText: "select * from :1 :2 :3 :4 where :5 :6",
+      chunkText: "select * from tblName :1 :2 :3 :4 where :5 :6",
       chunkOrder: 1,
       chunksTotal: 1,
       binds: [
@@ -90,6 +91,20 @@ describe("checks tagsToBinds function", () => {
       sqlText,
       tags,
       includeResults: false,
+    });
+    expect(ret[0]).to.containSubset(expected);
+  });
+
+  it("check tags absence", async () => {
+    const sqlText = "select * from tableName";
+    const expected = {
+      chunkText: sqlText,
+      chunkOrder: 1,
+      chunksTotal: 1,
+      binds: [],
+    };
+    const ret = await snowflake.executeAll({
+      sqlText,
     });
     expect(ret[0]).to.containSubset(expected);
   });
