@@ -50,6 +50,6 @@
     "typescript": "^3.9.7"
   },
   "dependencies": {
-    "snowflake-promise": "^4.2.0"
+    "snowflake-promise": "^4.5.0"
   }
 }
