@@ -1,4 +1,4 @@
-# snowflake-multisql [![npm](https://img.shields.io/npm/v/snowflake-multisql.svg)](https://www.npmjs.com/package/snowflake-multisql) [![node](https://img.shields.io/node/v/snowflake-multisql.svg)](https://www.npmjs.com/package/snowflake-multisql)
+# snowflake-multisql [![npm](https://img.shields.io/npm/v/snowflake-multisql.svg)](https://www.npmjs.com/package/snowflake-multisql) [![node](https://img.shields.io/node/v/snowflake-multisql.svg)](https://www.npmjs.com/package/snowflake-multisql) ![GitHub issues](https://img.shields.io/github/issues/brugos/snowflake-multisql)
 
 A Multi SQL Statement, Promise-based and Typescript version to your [Snowflake](https://www.snowflake.net/) data warehouse, since the original library doesn't support this multi statement calls.
 
